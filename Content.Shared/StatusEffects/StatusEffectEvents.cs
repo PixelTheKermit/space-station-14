@@ -7,7 +7,7 @@ namespace Content.Shared.StatusEffects;
 /// </summary>
 public sealed class StatusEffectRelayEvent<TEvent> : EntityEventArgs
 {
-    public readonly TEvent Args;
+    public TEvent Args;
     public EntityUid Afflicted;
 
     public StatusEffectRelayEvent(TEvent args, EntityUid afflicted)
