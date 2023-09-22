@@ -69,34 +69,59 @@ public abstract partial class SharedStatusEffectsSystem : EntitySystem
 
     #region Funcitons
 
-    /// <summary>
-    /// Used to apply a status effect onto an entity. It should first check if the entity should have the effect anyways. Returns null/the effect entity when successfully applied.
-    /// </summary>
-    /// <param name="effectApplyType">Use the EffectModifyMode enum.</param>
-    public EntityUid? TryApplyStatusEffect(
+    public bool TryApplyStatusEffect(
         EntityUid uid,
         string effectID,
-        int stacks,
+        int? stacks = null,
         TimeSpan? length = null,
         EffectModifyMode effectApplyType = EffectModifyMode.Override,
         StatusEffectsComponent? comp = null)
     {
+        return TryApplyStatusEffect(uid, effectID, out var _, stacks, length, effectApplyType, comp);
+    }
+
+    /// <summary>
+    /// Used to apply a status effect onto an entity. It should first check if the entity should have the effect anyways. Returns null/the effect entity when successfully applied.
+    /// </summary>
+    /// <param name="effectApplyType">Use the EffectModifyMode enum.</param>
+    public bool TryApplyStatusEffect(
+        EntityUid uid,
+        string effectID,
+        out EntityUid? effectUid,
+        int? stacks = null,
+        TimeSpan? length = null,
+        EffectModifyMode effectApplyType = EffectModifyMode.Override,
+        StatusEffectsComponent? comp = null)
+    {
+        effectUid = null;
+
+        if (!Resolve(uid, ref comp)
+        || comp.StatusContainer == null
+        || !CanApplyStatusEffect(uid, effectID, comp))
+            return false;
+
+        effectUid = ApplyStatusEffect(uid, effectID, stacks, length, effectApplyType, comp);
+
+        return effectUid != null;
+    }
+
+    public bool CanApplyStatusEffect(EntityUid uid, string effectID, StatusEffectsComponent? comp = null)
+    {
         if (!Resolve(uid, ref comp) || comp.StatusContainer == null)
-            return null;
+            return false;
 
         if (comp.EffectsWhitelist != null)
         {
-            if (!_protoManager.TryIndex<StatusEffectWhitelistPrototype>(comp.EffectsWhitelist, out var whitelist)) // In case of misspelling, don't leave the coder in shambles trying to figure out what went wrong.
+            foreach (var prototype in comp.EffectsWhitelist)
             {
-                _sawmill.Warning($"The effect whitelist prototype '{comp.EffectsWhitelist}' does not exist. Have you tried creating one?");
-                return null;
+                if (!_protoManager.TryIndex<StatusEffectWhitelistPrototype>(prototype, out var whitelist)) // In case of misspelling, don't leave the coder in shambles trying to figure out what went wrong.
+                    _sawmill.Warning($"The effect whitelist prototype '{comp.EffectsWhitelist}' does not exist. Have you tried creating one?");
+                else if (whitelist.Effects.Any(effect => effect == effectID))
+                    return true;
             }
-            if (!whitelist.Effects.Any(effect => effect == effectID))
-                return null;
+            return false;
         }
-
-        var effect = ApplyStatusEffect(uid, effectID, stacks, length, effectApplyType, comp);
-        return effect;
+        return true;
     }
 
     /// <summary>
@@ -106,12 +131,12 @@ public abstract partial class SharedStatusEffectsSystem : EntitySystem
     public EntityUid? ApplyStatusEffect(
         EntityUid uid,
         string effectID,
-        int stacks,
+        int? stacks,
         TimeSpan? length = null,
         EffectModifyMode effectApplyType = EffectModifyMode.Override,
         StatusEffectsComponent? comp = null)
     {
-        if (!Resolve(uid, ref comp) || comp.StatusContainer == null || stacks <= 0)
+        if (!Resolve(uid, ref comp) || comp.StatusContainer == null)
             return null;
 
         if (!PrototypeManager.TryIndex<EntityPrototype>(effectID, out var effectPrototype))
@@ -130,6 +155,9 @@ public abstract partial class SharedStatusEffectsSystem : EntitySystem
                 return storedEffect;
             }
         }
+
+        if (stacks != null && stacks <= 0)
+            return null;
 
         var effect = Spawn(effectID, Transform(uid).Coordinates);
         ModifyEffect(effect, stacks, length, EffectModifyMode.Override);

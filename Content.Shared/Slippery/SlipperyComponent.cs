@@ -23,6 +23,14 @@ namespace Content.Shared.Slippery
         public SoundSpecifier SlipSound = new SoundPathSpecifier("/Audio/Effects/slip.ogg");
 
         /// <summary>
+        /// The effect to apply that should knock down the entity
+        /// </summary>
+        [ViewVariables(VVAccess.ReadWrite)]
+        [DataField("paralysisEffect")]
+        [Access(Other = AccessPermissions.ReadWrite)]
+        public float ParalysisEffect = "KnockedDownEffect";
+
+        /// <summary>
         /// How many seconds the mob will be paralyzed for.
         /// </summary>
         [ViewVariables(VVAccess.ReadWrite)]

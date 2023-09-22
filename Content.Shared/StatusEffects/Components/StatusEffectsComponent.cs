@@ -12,7 +12,7 @@ public sealed class StatusEffectsComponent : Component
     public string StatusContainerId = "status-effect-container";
 
     [DataField("effectsWhitelist", customTypeSerializer: typeof(PrototypeIdSerializer<StatusEffectWhitelistPrototype>))]
-    public string? EffectsWhitelist;
+    public List<string>? EffectsWhitelist;
 
     [ViewVariables(VVAccess.ReadWrite)]
     public Container? StatusContainer = default!;
