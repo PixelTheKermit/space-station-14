@@ -58,6 +58,14 @@
     {
       "name": "target",
       "directions": 4
+    },
+    {
+      "name": "belly",
+      "directions": 4
+    },
+    {
+      "name": "radioactive",
+      "directions": 4
     }
   ]
 }

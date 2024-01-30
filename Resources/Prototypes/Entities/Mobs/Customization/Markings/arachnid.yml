@@ -287,6 +287,32 @@
       type:
         !type:EyeColoring
 
+- type: marking
+  id: ArachnidTorsoBelly
+  bodyPart: Chest
+  markingCategory: Chest
+  speciesRestriction: [Arachnid]
+  sprites:
+  - sprite: Mobs/Customization/Arachnid/chest.rsi
+    state: belly
+  coloring:
+    default:
+      type:
+        !type:EyeColoring
+
+- type: marking
+  id: ArachnidTorsoRadioactive
+  bodyPart: Chest
+  markingCategory: Chest
+  speciesRestriction: [Arachnid]
+  sprites:
+  - sprite: Mobs/Customization/Arachnid/chest.rsi
+    state: radioactive
+  coloring:
+    default:
+      type:
+        !type:EyeColoring
+
 # Arms
 - type: marking
   id: ArachnidRArmStripes
